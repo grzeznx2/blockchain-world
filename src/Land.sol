@@ -15,6 +15,7 @@ contract Land is ERC721 {
 
     uint256 public GRID_SIZE = 999;
     mapping(uint256 => mapping(uint256 => bool)) private positions;
+    mapping(uint256 => Position) private positionById;
     mapping(address => uint256) private landHolders;
 
     constructor() ERC721("LAND", "LAND"){}
@@ -25,7 +26,13 @@ contract Land is ERC721 {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         positions[_x][_y] = true;
+        positionById[tokenId] = Position(_x, _y);
         landHolders[msg.sender] = tokenId;
         _safeMint(msg.sender, tokenId);
+    }
+
+    function getPositionById(uint256 landId) external view returns (Position memory){
+        _requireMinted(landId);
+        return positionById[landId];
     }
 }
