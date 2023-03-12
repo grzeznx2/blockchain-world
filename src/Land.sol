@@ -13,6 +13,18 @@ contract Land is ERC721 {
         uint256 y;
     }
 
+    struct BuildingLevels {
+        uint256 building1;
+        uint256 building2;
+        uint256 building3;
+    }
+
+    struct LandStats {
+        uint256 id;
+        BuildingLevels buildigLevels;
+        Position position;
+    }
+
     uint256 public GRID_SIZE = 999;
     mapping(uint256 => mapping(uint256 => bool)) private positions;
     mapping(uint256 => Position) private positionById;
