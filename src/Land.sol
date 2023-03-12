@@ -13,12 +13,14 @@ contract Land is ERC721 {
         uint256 y;
     }
 
+    uint256 public GRID_SIZE = 999;
     mapping(uint256 => mapping(uint256 => bool)) private positions;
     mapping(address => uint256) private landHolders;
 
     constructor() ERC721("LAND", "LAND"){}
 
     function safeMint(uint256 _x, uint256 _y) external {
+        require(_x <= GRID_SIZE && _x >= 0 && _y <= GRID_SIZE && _y >= 0, "LAND: invalid x or y");
         require(positions[_x][_y]==false,"Land: Land already taken");
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
