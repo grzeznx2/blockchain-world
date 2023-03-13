@@ -20,6 +20,24 @@ contract Town is ERC721 {
         uint256 y;
     }
 
+    struct RequiredBuildingLevel {
+        uint256 id;
+        uint256 level;
+    }
+
+    struct BaseBuildingProps {
+        uint256 id;
+        uint256 level;
+        uint256 maxLevel;
+        RequiredBuildingLevel[] requiredBuildingsPerLevel;
+        uint256[] costPerLevel;
+        string name;
+    }
+
+    struct Building {
+        BaseBuildingProps base;
+    }
+
     struct BuildingLevels {
         uint256 building1;
         uint256 building2;
