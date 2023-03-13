@@ -15,6 +15,13 @@ contract Town is ERC721 {
         FOURTH
     }
 
+    enum Resource {
+        GOLD,
+        WOOD,
+        ROCK,
+        DIAMOND
+    }
+
     struct Position {
         uint256 x;
         uint256 y;
@@ -25,12 +32,19 @@ contract Town is ERC721 {
         uint256 level;
     }
 
+    struct ResourceCost {
+        uint256 gold;
+        uint256 wood;
+        uint256 rock;
+        uint256 diamond;
+    }
+
     struct BaseBuildingProps {
         uint256 id;
         uint256 level;
         uint256 maxLevel;
         RequiredBuildingLevel[] requiredBuildingsPerLevel;
-        uint256[] costPerLevel;
+        ResourceCost[] resourceCostPerLevel;
         string name;
     }
 
