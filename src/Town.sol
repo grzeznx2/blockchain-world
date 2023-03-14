@@ -7,6 +7,14 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 contract Town is ERC721 {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
+    Counters.Counter private _buildingIdCounter;
+
+    enum BuildingType {
+        GOLD_MINE,
+        DIAMOND_MINE,
+        ROCK_MINE,
+        LUMBER_MILL
+    }
 
     enum TownType {
         FIRST,
@@ -28,7 +36,7 @@ contract Town is ERC721 {
     }
 
     struct RequiredBuildingLevel {
-        uint256 id;
+        BuildingType buildingType;
         uint256 level;
     }
 
@@ -40,10 +48,10 @@ contract Town is ERC721 {
     }
 
     struct BaseBuildingProps {
-        uint256 id;
+        BuildingType buildingType;
         uint256 level;
         uint256 maxLevel;
-        RequiredBuildingLevel[] requiredBuildingsPerLevel;
+        RequiredBuildingLevel[][] requiredBuildingsPerLevel;
         ResourceCost[] resourceCostPerLevel;
         string name;
     }
@@ -69,8 +77,16 @@ contract Town is ERC721 {
     mapping(uint256 => mapping(uint256 => bool)) private positions;
     mapping(address => uint256) private townHolders;
     mapping(uint256 => TownStats) private townById;
+    mapping(TownType => TownStats) private initialTownStatsByType;
+    mapping(TownType => mapping(BuildingType => BaseBuildingProps)) private initialBuildings;
+    struct TownSchema {
+        TownType townType;
+        mapping(BuildingType => Building) buildings;
+    }
+    mapping(TownType => TownSchema) private townLibrary;
 
-    constructor() ERC721("TOWN", "TOWN"){}
+    constructor() ERC721("TOWN", "TOWN"){
+    }
 
     function safeMint(uint256 _x, uint256 _y, TownType townType) external {
         require(_x <= GRID_SIZE && _x >= 0 && _y <= GRID_SIZE && _y >= 0, "TOWN: invalid x or y");
@@ -91,5 +107,9 @@ contract Town is ERC721 {
     function getTownStatsById(uint256 townId) external view returns (TownStats memory){
         _requireMinted(townId);
         return townById[townId];
+    }
+
+    function setInitialTown(Town town) external {
+
     }
 }
