@@ -72,6 +72,11 @@ contract Town is ERC721 {
         BuildingLevels buildigLevels;
         Position position;
     }
+    
+    struct TownSchema {
+        TownType townType;
+        mapping(BuildingType => Building) buildings;
+    }
 
     uint256 public GRID_SIZE = 999;
     mapping(uint256 => mapping(uint256 => bool)) private positions;
@@ -79,10 +84,6 @@ contract Town is ERC721 {
     mapping(uint256 => TownStats) private townById;
     mapping(TownType => TownStats) private initialTownStatsByType;
     mapping(TownType => mapping(BuildingType => BaseBuildingProps)) private initialBuildings;
-    struct TownSchema {
-        TownType townType;
-        mapping(BuildingType => Building) buildings;
-    }
     mapping(TownType => TownSchema) private townLibrary;
 
     constructor() ERC721("TOWN", "TOWN"){
