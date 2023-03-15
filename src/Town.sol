@@ -109,4 +109,22 @@ contract Town is ERC721 {
         return townById[townId];
     }
 
+    function addBuilding(BuildingType buildingType, TownType townType, uint256 maxLevel, RequiredBuildingLevel[][] memory rbl) public {
+        Building storage building = townByTownType[townType].buildings[buildingType];
+        building.buildingType = buildingType;
+        building.townType = townType;
+        building.maxLevel = maxLevel;
+
+        uint256 rblLength = rbl.length;
+
+        for(uint256 i; i < rblLength; i++){
+            uint256 length = rbl[i].length;
+            building.requiredBuildingLevels.push(requiredBuildingLevelsId);
+                for(uint256 j; j < length; j++){
+                    RequiredBuildingLevel memory newRBL = RequiredBuildingLevel(rbl[i][j].level, rbl[i][j].buildingType);
+                    requiredBuildingLevelsMap[requiredBuildingLevelsId].push(newRBL);
+                }
+            requiredBuildingLevelsId++;
+        }
+    }
 }
