@@ -4,6 +4,7 @@ pragma solidity ^0.8.18;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
+
 contract Town is ERC721 {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
@@ -36,8 +37,8 @@ contract Town is ERC721 {
     }
 
     struct RequiredBuildingLevel {
-        BuildingType buildingType;
         uint256 level;
+        BuildingType buildingType;
     }
 
     struct ResourceCost {
@@ -47,17 +48,12 @@ contract Town is ERC721 {
         uint256 diamond;
     }
 
-    struct BaseBuildingProps {
-        BuildingType buildingType;
-        uint256 level;
-        uint256 maxLevel;
-        RequiredBuildingLevel[][] requiredBuildingsPerLevel;
-        ResourceCost[] resourceCostPerLevel;
-        string name;
-    }
-
     struct Building {
-        BaseBuildingProps base;
+        BuildingType buildingType;
+        TownType townType;
+        uint256[] requiredBuildingLevels;
+        uint256 maxLevel;
+        string name;
     }
 
     struct BuildingLevels {
@@ -72,19 +68,22 @@ contract Town is ERC721 {
         BuildingLevels buildigLevels;
         Position position;
     }
-    
+
     struct TownSchema {
         TownType townType;
         mapping(BuildingType => Building) buildings;
     }
+
+    mapping(TownType => TownSchema) public townByTownType;
+    mapping(uint256 => RequiredBuildingLevel[]) public requiredBuildingLevelsMap;
+    uint256 requiredBuildingLevelsId;
 
     uint256 public GRID_SIZE = 999;
     mapping(uint256 => mapping(uint256 => bool)) private positions;
     mapping(address => uint256) private townHolders;
     mapping(uint256 => TownStats) private townById;
     mapping(TownType => TownStats) private initialTownStatsByType;
-    mapping(TownType => mapping(BuildingType => BaseBuildingProps)) private initialBuildings;
-    mapping(TownType => TownSchema) private townLibrary;
+    mapping(TownType => TownSchema) private townSchemaByTownType;
 
     constructor() ERC721("TOWN", "TOWN"){
     }
@@ -110,7 +109,4 @@ contract Town is ERC721 {
         return townById[townId];
     }
 
-    function setInitialTown(Town town) external {
-
-    }
 }
