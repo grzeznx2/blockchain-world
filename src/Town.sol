@@ -74,7 +74,6 @@ contract Town is ERC721 {
         mapping(BuildingType => Building) buildings;
     }
 
-    mapping(TownType => TownSchema) public townByTownType;
     mapping(uint256 => RequiredBuildingLevel[]) public requiredBuildingLevelsMap;
     uint256 requiredBuildingLevelsId;
 
@@ -110,7 +109,7 @@ contract Town is ERC721 {
     }
 
     function addBuilding(BuildingType buildingType, TownType townType, uint256 maxLevel, RequiredBuildingLevel[][] memory rbl) public {
-        Building storage building = townByTownType[townType].buildings[buildingType];
+        Building storage building = townSchemaByTownType[townType].buildings[buildingType];
         building.buildingType = buildingType;
         building.townType = townType;
         building.maxLevel = maxLevel;
@@ -126,5 +125,9 @@ contract Town is ERC721 {
                 }
             requiredBuildingLevelsId++;
         }
+    }
+
+    function getBuildingFromSchema(BuildingType buildingType, TownType townType) public view returns (Building memory){
+        return townSchemaByTownType[townType].buildings[buildingType];
     }
 }
