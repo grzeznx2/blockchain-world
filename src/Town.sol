@@ -54,6 +54,7 @@ contract Town is ERC721 {
         uint256[] requiredBuildingLevels;
         ResourceCost[] requiredResourceCostLevels;
         uint256 maxLevel;
+        uint256 initialLevel;
         string name;
     }
 
@@ -109,11 +110,12 @@ contract Town is ERC721 {
         return townById[townId];
     }
 
-    function addBuilding(string calldata _name, BuildingType buildingType, TownType townType, uint256 maxLevel, RequiredBuildingLevel[][] memory rbl, ResourceCost[] memory _resourceCostLevels) public {
+    function addBuilding(string calldata _name, uint256 _initialLevel, BuildingType buildingType, TownType townType, uint256 maxLevel, RequiredBuildingLevel[][] memory rbl, ResourceCost[] memory _resourceCostLevels) public {
         Building storage building = townSchemaByTownType[townType].buildings[buildingType];
         building.buildingType = buildingType;
         building.townType = townType;
         building.maxLevel = maxLevel;
+        building.initialLevel = _initialLevel;
         building.name = _name;
 
         uint256 rblLength = rbl.length;
