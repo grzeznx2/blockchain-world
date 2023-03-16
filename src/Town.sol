@@ -31,6 +31,10 @@ contract Town is ERC721 {
         DIAMOND
     }
 
+    enum Feature {
+        CREATE_UNITS
+    }
+
     struct Position {
         uint256 x;
         uint256 y;
@@ -56,6 +60,7 @@ contract Town is ERC721 {
         uint256 maxLevel;
         uint256 initialLevel;
         string name;
+        mapping(Feature => uint256[]) features;
     }
 
     struct BuildingLevels {
