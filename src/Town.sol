@@ -8,8 +8,9 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 contract Town is ERC721 {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
-    Counters.Counter private _buildingIdCounter;
+    Counters.Counter private _buildingTypeIdCounter;
     Counters.Counter private _townTypeIdCounter;
+    // Counters.Counter private _buildingIdCounter;
 
     enum BuildingType {
         GOLD_MINE,
@@ -43,7 +44,7 @@ contract Town is ERC721 {
 
     struct RequiredBuildingLevel {
         uint256 level;
-        BuildingType buildingType;
+        uint256 buildingTypeId;
     }
 
     struct ResourceCost {
@@ -54,7 +55,7 @@ contract Town is ERC721 {
     }
 
     struct Building {
-        BuildingType buildingType;
+        uint256 buildingTypeId;
         uint256 townTypeId;
         uint256[] requiredBuildingLevels;
         ResourceCost[] requiredResourceCostLevels;
@@ -78,7 +79,7 @@ contract Town is ERC721 {
 
     struct TownSchema {
         string townType;
-        mapping(BuildingType => Building) buildings;
+        mapping(uint256 => Building) buildings;
     }
 
     mapping(uint256 => RequiredBuildingLevel[]) public requiredBuildingLevelsMap;
@@ -90,8 +91,10 @@ contract Town is ERC721 {
     mapping(uint256 => TownStats) private townById;
     mapping(TownType => TownStats) private initialTownStatsByType;
     mapping(uint256 => TownSchema) private townSchemaByTownId;
-    mapping(uint256 => string) private townTypeById;
-    mapping(uint256 => bool) private townTypeExists;
+    mapping(uint256 => string) public townTypeById;
+    mapping(uint256 => bool) public townTypeExists;
+    mapping(uint256 => string) public buildingTypeById;
+    mapping(uint256 => bool) public buildingTypeExists;
 
 
     constructor() ERC721("TOWN", "TOWN"){
@@ -99,6 +102,10 @@ contract Town is ERC721 {
 
     function requireTownType(uint256 _townTypeId) public view {
         require(townTypeExists[_townTypeId], "Town: Town type does not exist");
+    }
+
+    function requireBuildingType(uint256 _buildingTypeId) public view {
+        require(buildingTypeExists[_buildingTypeId], "Town: Building type does not exist");
     }
 
     function safeMint(uint256 _x, uint256 _y, uint256 _townTypeId) external {
@@ -123,10 +130,12 @@ contract Town is ERC721 {
         return townById[townId];
     }
 
-    function addBuilding(string calldata _name, uint256 _initialLevel, BuildingType buildingType, uint256 _townTypeId, uint256 maxLevel, RequiredBuildingLevel[][] memory rbl, ResourceCost[] memory _resourceCostLevels) public {
+    function addBuilding(string calldata _name, uint256 _initialLevel, uint256 _buildingTypeId, uint256 _townTypeId, uint256 maxLevel, RequiredBuildingLevel[][] memory rbl, ResourceCost[] memory _resourceCostLevels) public {
         requireTownType(_townTypeId);
-        Building storage building = townSchemaByTownId[_townTypeId].buildings[buildingType];
-        building.buildingType = buildingType;
+        requireBuildingType(_buildingTypeId);
+
+        Building storage building = townSchemaByTownId[_townTypeId].buildings[_buildingTypeId];
+        building.buildingTypeId = _buildingTypeId;
         building.townTypeId = _townTypeId;
         building.maxLevel = maxLevel;
         building.initialLevel = _initialLevel;
@@ -139,15 +148,15 @@ contract Town is ERC721 {
             building.requiredResourceCostLevels.push(_resourceCostLevels[i]);
             building.requiredBuildingLevels.push(requiredBuildingLevelsId);
                 for(uint256 j; j < length; j++){
-                    RequiredBuildingLevel memory newRBL = RequiredBuildingLevel(rbl[i][j].level, rbl[i][j].buildingType);
+                    RequiredBuildingLevel memory newRBL = RequiredBuildingLevel(rbl[i][j].level, rbl[i][j].buildingTypeId);
                     requiredBuildingLevelsMap[requiredBuildingLevelsId].push(newRBL);
                 }
             requiredBuildingLevelsId++;
         }
     }
 
-    function getBuildingFromSchema(BuildingType buildingType, uint256 _townTypeId) public view returns (Building memory){
-        return townSchemaByTownId[_townTypeId].buildings[buildingType];
+    function getBuildingFromSchema(uint256 _buildingTypeId, uint256 _townTypeId) public view returns (Building memory){
+        return townSchemaByTownId[_townTypeId].buildings[_buildingTypeId];
     }
 
     function addTownType(string calldata _townType) public {
@@ -161,6 +170,20 @@ contract Town is ERC721 {
         uint256 length = _townTypes.length;
         for(uint256 i; i < length; i++){
             addTownType(_townTypes[i]);
+        }
+    }
+
+    function addBuildingType(string calldata _buildingType) public {
+        uint256 buildingTypeId = _buildingTypeIdCounter.current();
+        _buildingTypeIdCounter.increment();
+        buildingTypeById[buildingTypeId] = _buildingType;
+        buildingTypeExists[buildingTypeId] = true;
+    }
+
+      function addBuildingTypes(string[] calldata _buildingTypes) public {
+        uint256 length = _buildingTypes.length;
+        for(uint256 i; i < length; i++){
+            addBuildingType(_buildingTypes[i]);
         }
     }
 }
