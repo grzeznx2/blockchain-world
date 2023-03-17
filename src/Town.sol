@@ -51,7 +51,7 @@ contract Town is ERC721 {
         uint256 buildingTypeId;
     }
 
-    struct ResourceCost {
+    struct ResourcesAmount {
         uint256 gold;
         uint256 wood;
         uint256 rock;
@@ -65,7 +65,7 @@ contract Town is ERC721 {
         uint256 attack;
         uint256 health;
         uint256 speed;
-        ResourceCost resourceCost;
+        ResourcesAmount resourceCost;
         string name;
     }
 
@@ -76,7 +76,7 @@ contract Town is ERC721 {
         uint256 attack;
         uint256 health;
         uint256 speed;
-        ResourceCost resourceCost;
+        ResourcesAmount resourceCost;
         string name;
     }
 
@@ -84,7 +84,7 @@ contract Town is ERC721 {
         uint256 buildingTypeId;
         uint256 townTypeId;
         uint256[] requiredBuildingLevels;
-        ResourceCost[] requiredResourceCostLevels;
+        ResourcesAmount[] requiredResourceCostLevels;
         uint256[] createUnitDataPerLevel;
         uint256 maxLevel;
         uint256 initialLevel;
@@ -167,7 +167,7 @@ contract Town is ERC721 {
         return townById[townId];
     }
 
-    function addBuilding(string calldata _name, uint256 _initialLevel, uint256 _buildingTypeId, uint256 _townTypeId, uint256 maxLevel, RequiredBuildingLevel[][] memory rbl, CreateUnitData[][] memory _createUnitDataPerLevel, ResourceCost[] memory _resourceCostLevels) public {
+    function addBuilding(string calldata _name, uint256 _initialLevel, uint256 _buildingTypeId, uint256 _townTypeId, uint256 maxLevel, RequiredBuildingLevel[][] memory rbl, CreateUnitData[][] memory _createUnitDataPerLevel, ResourcesAmount[] memory _resourceCostLevels) public {
         requireTownType(_townTypeId);
         requireBuildingType(_buildingTypeId);
 
