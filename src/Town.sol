@@ -119,6 +119,9 @@ contract Town is ERC721 {
     mapping(uint256 => TownStats) private townById;
     mapping(TownType => TownStats) private initialTownStatsByType;
     mapping(uint256 => TownSchema) private townSchemaByTownId;
+    uint256[] public townTypeIds;
+    uint256[] public buildingTypeIds;
+    uint256[] public unitTypeIds;
     mapping(uint256 => string) public townTypeById;
     mapping(uint256 => bool) public townTypeExists;
     mapping(uint256 => string) public buildingTypeById;
@@ -184,6 +187,7 @@ contract Town is ERC721 {
             _requiredBuildingLevelsIdCounter.increment();
             building.requiredBuildingLevels.push(requiredBuildingLevelsId);
                 for(uint256 j; j < length; j++){
+                    // TODO: check if building type exists
                     RequiredBuildingLevel memory newRBL = RequiredBuildingLevel(rbl[i][j].level, rbl[i][j].buildingTypeId);
                     requiredBuildingLevelMap[requiredBuildingLevelsId].push(newRBL);
                 }
@@ -197,6 +201,8 @@ contract Town is ERC721 {
             uint256 length = _createUnitDataPerLevel[i].length;
             building.createUnitDataPerLevel.push(createUnitDataId);
                 for(uint256 j; j < length; j++){
+                    // TODO: check if unit type exists
+                    // TODO: check if town type exists
                     CreateUnitData memory createUnitData = CreateUnitData(_createUnitDataPerLevel[i][j].unitTypeId, _createUnitDataPerLevel[i][j].townTypeId, _createUnitDataPerLevel[i][j].growthRate);
                     createUnitDataPerLevelMap[createUnitDataId].push(createUnitData);
                 }
@@ -230,6 +236,7 @@ contract Town is ERC721 {
     function addTownType(string calldata _townType) public {
         uint256 townTypeId = _townTypeIdCounter.current();
         _townTypeIdCounter.increment();
+        townTypeIds.push(townTypeId);
         townTypeById[townTypeId] = _townType;
         townTypeExists[townTypeId] = true;
     }
@@ -244,6 +251,7 @@ contract Town is ERC721 {
     function addBuildingType(string calldata _buildingType) public {
         uint256 buildingTypeId = _buildingTypeIdCounter.current();
         _buildingTypeIdCounter.increment();
+        buildingTypeIds.push(buildingTypeId);
         buildingTypeById[buildingTypeId] = _buildingType;
         buildingTypeExists[buildingTypeId] = true;
     }
@@ -258,6 +266,7 @@ contract Town is ERC721 {
     function addUnitType(string calldata _unitType) public {
         uint256 unitTypeId = _unitTypeIdCounter.current();
         _unitTypeIdCounter.increment();
+        unitTypeIds.push(unitTypeId);
         unitTypeById[unitTypeId] = _unitType;
         unitTypeExists[unitTypeId] = true;
     }
