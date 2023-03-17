@@ -11,6 +11,8 @@ contract Town is ERC721 {
     Counters.Counter private _buildingTypeIdCounter;
     Counters.Counter private _townTypeIdCounter;
     Counters.Counter private _unitTypeIdCounter;
+    Counters.Counter private _createUnitDataIdCounter;
+    Counters.Counter private _requiredBuildingLevelsIdCounter;
 
     enum BuildingType {
         GOLD_MINE,
@@ -36,6 +38,12 @@ contract Town is ERC721 {
     struct Position {
         uint256 x;
         uint256 y;
+    }
+
+    struct CreateUnitData {
+        uint256 unitTypeId;
+        uint256 townTypeId;
+        uint256 growthRate;
     }
 
     struct RequiredBuildingLevel {
@@ -77,6 +85,7 @@ contract Town is ERC721 {
         uint256 townTypeId;
         uint256[] requiredBuildingLevels;
         ResourceCost[] requiredResourceCostLevels;
+        uint256[] createUnitDataPerLevel;
         uint256 maxLevel;
         uint256 initialLevel;
         string name;
@@ -101,8 +110,8 @@ contract Town is ERC721 {
         mapping(uint256 => Unit) units;
     }
 
-    mapping(uint256 => RequiredBuildingLevel[]) public requiredBuildingLevelsMap;
-    uint256 requiredBuildingLevelsId;
+    mapping(uint256 => RequiredBuildingLevel[]) public requiredBuildingLevelMap;
+    mapping(uint256 => CreateUnitData[]) public createUnitDataPerLevelMap;
 
     uint256 public GRID_SIZE = 999;
     mapping(uint256 => mapping(uint256 => bool)) private positions;
@@ -155,7 +164,7 @@ contract Town is ERC721 {
         return townById[townId];
     }
 
-    function addBuilding(string calldata _name, uint256 _initialLevel, uint256 _buildingTypeId, uint256 _townTypeId, uint256 maxLevel, RequiredBuildingLevel[][] memory rbl, ResourceCost[] memory _resourceCostLevels) public {
+    function addBuilding(string calldata _name, uint256 _initialLevel, uint256 _buildingTypeId, uint256 _townTypeId, uint256 maxLevel, RequiredBuildingLevel[][] memory rbl, CreateUnitData[][] memory _createUnitDataPerLevel, ResourceCost[] memory _resourceCostLevels) public {
         requireTownType(_townTypeId);
         requireBuildingType(_buildingTypeId);
 
@@ -171,12 +180,26 @@ contract Town is ERC721 {
         for(uint256 i; i < rblLength; i++){
             uint256 length = rbl[i].length;
             building.requiredResourceCostLevels.push(_resourceCostLevels[i]);
+            uint256 requiredBuildingLevelsId = _requiredBuildingLevelsIdCounter.current();
+            _requiredBuildingLevelsIdCounter.increment();
             building.requiredBuildingLevels.push(requiredBuildingLevelsId);
                 for(uint256 j; j < length; j++){
                     RequiredBuildingLevel memory newRBL = RequiredBuildingLevel(rbl[i][j].level, rbl[i][j].buildingTypeId);
-                    requiredBuildingLevelsMap[requiredBuildingLevelsId].push(newRBL);
+                    requiredBuildingLevelMap[requiredBuildingLevelsId].push(newRBL);
                 }
-            requiredBuildingLevelsId++;
+        }
+
+        uint256 createUnitDataPerLevelLength = _createUnitDataPerLevel.length;
+
+        for(uint256 i; i < createUnitDataPerLevelLength; i++){
+            uint256 createUnitDataId = _createUnitDataIdCounter.current();
+            _createUnitDataIdCounter.increment();
+            uint256 length = _createUnitDataPerLevel[i].length;
+            building.createUnitDataPerLevel.push(createUnitDataId);
+                for(uint256 j; j < length; j++){
+                    CreateUnitData memory createUnitData = CreateUnitData(_createUnitDataPerLevel[i][j].unitTypeId, _createUnitDataPerLevel[i][j].townTypeId, _createUnitDataPerLevel[i][j].growthRate);
+                    createUnitDataPerLevelMap[createUnitDataId].push(createUnitData);
+                }
         }
     }
 
