@@ -10,7 +10,7 @@ contract Town is ERC721 {
     Counters.Counter private _tokenIdCounter;
     Counters.Counter private _buildingTypeIdCounter;
     Counters.Counter private _townTypeIdCounter;
-    // Counters.Counter private _buildingIdCounter;
+    Counters.Counter private _unitTypeIdCounter;
 
     enum BuildingType {
         GOLD_MINE,
@@ -31,10 +31,6 @@ contract Town is ERC721 {
         WOOD,
         ROCK,
         DIAMOND
-    }
-
-    enum Feature {
-        CREATE_UNITS
     }
 
     struct Position {
@@ -95,6 +91,8 @@ contract Town is ERC721 {
     mapping(uint256 => bool) public townTypeExists;
     mapping(uint256 => string) public buildingTypeById;
     mapping(uint256 => bool) public buildingTypeExists;
+    mapping(uint256 => string) public unitTypeById;
+    mapping(uint256 => bool) public unitTypeExists;
 
 
     constructor() ERC721("TOWN", "TOWN"){
@@ -180,10 +178,25 @@ contract Town is ERC721 {
         buildingTypeExists[buildingTypeId] = true;
     }
 
-      function addBuildingTypes(string[] calldata _buildingTypes) public {
+    function addBuildingTypes(string[] calldata _buildingTypes) public {
         uint256 length = _buildingTypes.length;
         for(uint256 i; i < length; i++){
             addBuildingType(_buildingTypes[i]);
         }
     }
+
+    function addUnitType(string calldata _unitType) public {
+        uint256 unitTypeId = _unitTypeIdCounter.current();
+        _unitTypeIdCounter.increment();
+        unitTypeById[unitTypeId] = _unitType;
+        unitTypeExists[unitTypeId] = true;
+    }
+
+    function addUnitTypes(string[] calldata _unitTypes) public {
+        uint256 length = _unitTypes.length;
+        for(uint256 i; i < length; i++){
+            addUnitType(_unitTypes[i]);
+        }
+    }
+    
 }
