@@ -215,7 +215,7 @@ contract Town is ERC721 {
 
     function addUnit(CreateUnitArgs memory args) public {
         requireTownType(args.townTypeId);
-        requireBuildingType(args.unitTypeId);
+        requireUnitType(args.unitTypeId);
        
         townSchemaByTownId[args.townTypeId].units[args.unitTypeId] = Unit(
             args.unitTypeId,
@@ -276,6 +276,15 @@ contract Town is ERC721 {
         for(uint256 i; i < length; i++){
             addUnitType(_unitTypes[i]);
         }
+    }
+
+    function getAllTownNames() public view returns (string[] memory){
+        uint256 length = townTypeIds.length;
+        string[] memory townNames = new string[](length);
+        for(uint256 i; i < length; i++){
+            townNames[i] = townTypeById[townTypeIds[i]];
+        }
+        return townNames;
     }
     
 }
