@@ -50,6 +50,28 @@ contract Town is ERC721 {
         uint256 diamond;
     }
 
+    struct Unit {
+        uint256 unitTypeId;
+        uint256 townTypeId;
+        uint256 defense;
+        uint256 attack;
+        uint256 health;
+        uint256 speed;
+        ResourceCost resourceCost;
+        string name;
+    }
+
+    struct CreateUnitArgs {
+        uint256 unitTypeId;
+        uint256 townTypeId;
+        uint256 defense;
+        uint256 attack;
+        uint256 health;
+        uint256 speed;
+        ResourceCost resourceCost;
+        string name;
+    }
+
     struct Building {
         uint256 buildingTypeId;
         uint256 townTypeId;
@@ -76,6 +98,7 @@ contract Town is ERC721 {
     struct TownSchema {
         string townType;
         mapping(uint256 => Building) buildings;
+        mapping(uint256 => Unit) units;
     }
 
     mapping(uint256 => RequiredBuildingLevel[]) public requiredBuildingLevelsMap;
@@ -104,6 +127,10 @@ contract Town is ERC721 {
 
     function requireBuildingType(uint256 _buildingTypeId) public view {
         require(buildingTypeExists[_buildingTypeId], "Town: Building type does not exist");
+    }
+
+    function requireUnitType(uint256 _unitTypeId) public view {
+        require(unitTypeExists[_unitTypeId], "Town: Unit type does not exist");
     }
 
     function safeMint(uint256 _x, uint256 _y, uint256 _townTypeId) external {
@@ -155,6 +182,26 @@ contract Town is ERC721 {
 
     function getBuildingFromSchema(uint256 _buildingTypeId, uint256 _townTypeId) public view returns (Building memory){
         return townSchemaByTownId[_townTypeId].buildings[_buildingTypeId];
+    }
+
+    function addUnit(CreateUnitArgs memory args) public {
+        requireTownType(args.townTypeId);
+        requireBuildingType(args.unitTypeId);
+       
+        townSchemaByTownId[args.townTypeId].units[args.unitTypeId] = Unit(
+            args.unitTypeId,
+            args.townTypeId,
+            args.defense,
+            args.attack,
+            args.health,
+            args.speed,
+            args.resourceCost,
+            args.name
+        );
+    }
+
+     function getUnitFromSchema(uint256 _unitTypeId, uint256 _townTypeId) public view returns (Unit memory){
+        return townSchemaByTownId[_townTypeId].units[_unitTypeId];
     }
 
     function addTownType(string calldata _townType) public {
