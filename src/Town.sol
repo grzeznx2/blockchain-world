@@ -80,7 +80,7 @@ contract Town is ERC721 {
         string name;
     }
 
-    struct Building {
+    struct BuildingSchema {
         uint256 buildingTypeId;
         uint256 townTypeId;
         uint256[] requiredBuildingLevels;
@@ -92,22 +92,19 @@ contract Town is ERC721 {
         string name;
     }
 
-    struct BuildingLevels {
-        uint256 building1;
-        uint256 building2;
-        uint256 building3;
+    struct Building {
+        uint256 level;
     }
-
     struct TownStats {
         uint256 id;
         uint256 townTypeId;
-        BuildingLevels buildigLevels;
+        mapping(uint256 => Building) buildings;
         Position position;
     }
 
     struct TownSchema {
         string townType;
-        mapping(uint256 => Building) buildings;
+        mapping(uint256 => BuildingSchema) buildings;
         mapping(uint256 => Unit) units;
     }
 
@@ -116,8 +113,8 @@ contract Town is ERC721 {
 
     uint256 public GRID_SIZE = 999;
     mapping(uint256 => mapping(uint256 => bool)) private positions;
-    mapping(address => uint256) private townHolders;
-    mapping(uint256 => TownStats) private townById;
+    mapping(address => uint256) private townNFTHolders;
+    mapping(uint256 => TownStats) private townNFTById;
     mapping(TownType => TownStats) private initialTownStatsByType;
     mapping(uint256 => TownSchema) private townSchemaByTownId;
     uint256[] public townTypeIds;
@@ -153,29 +150,30 @@ contract Town is ERC721 {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         positions[_x][_y] = true;
-        townHolders[msg.sender] = tokenId;
-        townById[tokenId] = TownStats(
-            tokenId,
-            _townTypeId,
-            BuildingLevels(0,0,0),
-            Position(_x,_y)
-        );
+        townNFTHolders[msg.sender] = tokenId;
+
+        TownStats storage townStats = townNFTById[tokenId];
+        townStats.id = tokenId;
+        townStats.townTypeId = _townTypeId;
+        townStats.position.x = _x;
+        townStats.position.y = _y;
+
         _safeMint(msg.sender, tokenId);
     }
 
-    function getTownStatsById(uint256 townId) external view returns (TownStats memory){
-        _requireMinted(townId);
-        return townById[townId];
-    }
+    // function getTownStatsById(uint256 townId) external view returns (TownStats memory){
+    //     _requireMinted(townId);
+    //     return townById[townId];
+    // }
 
-    function addBuilding
+    function addBuildingSchema
             (string calldata _name, uint256 _initialLevel, uint256 _buildingTypeId, uint256 _townTypeId, uint256 maxLevel,
             RequiredBuildingLevel[][] memory rbl, CreateUnitData[][] memory _createUnitDataPerLevel, ResourcesAmount[] memory _resourceCostLevels, ResourcesAmount[] memory _resourcesProducedPerLevel)
         public {
         requireTownType(_townTypeId);
         requireBuildingType(_buildingTypeId);
 
-        Building storage building = townSchemaByTownId[_townTypeId].buildings[_buildingTypeId];
+        BuildingSchema storage building = townSchemaByTownId[_townTypeId].buildings[_buildingTypeId];
         building.buildingTypeId = _buildingTypeId;
         building.townTypeId = _townTypeId;
         building.maxLevel = maxLevel;
@@ -214,7 +212,7 @@ contract Town is ERC721 {
         }
     }
 
-    function getBuildingFromSchema(uint256 _buildingTypeId, uint256 _townTypeId) public view returns (Building memory){
+    function getBuildingSchema(uint256 _buildingTypeId, uint256 _townTypeId) public view returns (BuildingSchema memory){
         return townSchemaByTownId[_townTypeId].buildings[_buildingTypeId];
     }
 
@@ -290,6 +288,32 @@ contract Town is ERC721 {
             townNames[i] = townTypeById[townTypeIds[i]];
         }
         return townNames;
+    }
+
+    function upgradeBuilding(uint256 _buildingTypeId, uint256 _townId) public {
+        require(msg.sender == ownerOf(_townId), "TOWN: not owner of town");
+        requireBuildingType(_buildingTypeId);
+        
+        TownStats storage townStats = townNFTById[_townId]; 
+        Building storage building = townStats.buildings[_buildingTypeId]; 
+        BuildingSchema memory buildingSchema = getBuildingSchema(_buildingTypeId, townStats.townTypeId);
+        require(building.level < buildingSchema.maxLevel, "TOWN: building max level reached");
+        uint256 nextBuildingLevel = building.level + 1;
+
+        // TODO: check if user has enough resources
+        ResourcesAmount memory requiredResources = buildingSchema.requiredResourceCostLevels[nextBuildingLevel];
+
+        RequiredBuildingLevel[] memory requiredBuildingLevels = requiredBuildingLevelMap[buildingSchema.requiredBuildingLevels[nextBuildingLevel]];
+
+        // check if buildings in town are at required level
+        for(uint256 i; i < requiredBuildingLevels.length; i++){
+            Building storage requiredBuilding = townStats.buildings[requiredBuildingLevels[i].buildingTypeId];
+            require(requiredBuilding.level >= requiredBuildingLevels[i].level, "TOWN: required building level not reached");
+        }
+
+        // TODO: Decrease user resources
+
+        building.level = nextBuildingLevel;
     }
     
 }
