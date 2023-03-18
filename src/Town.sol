@@ -85,6 +85,7 @@ contract Town is ERC721 {
         uint256 townTypeId;
         uint256[] requiredBuildingLevels;
         ResourcesAmount[] requiredResourceCostLevels;
+        ResourcesAmount[] resourcesProducedPerLevel;
         uint256[] createUnitDataPerLevel;
         uint256 maxLevel;
         uint256 initialLevel;
@@ -167,7 +168,10 @@ contract Town is ERC721 {
         return townById[townId];
     }
 
-    function addBuilding(string calldata _name, uint256 _initialLevel, uint256 _buildingTypeId, uint256 _townTypeId, uint256 maxLevel, RequiredBuildingLevel[][] memory rbl, CreateUnitData[][] memory _createUnitDataPerLevel, ResourcesAmount[] memory _resourceCostLevels) public {
+    function addBuilding
+            (string calldata _name, uint256 _initialLevel, uint256 _buildingTypeId, uint256 _townTypeId, uint256 maxLevel,
+            RequiredBuildingLevel[][] memory rbl, CreateUnitData[][] memory _createUnitDataPerLevel, ResourcesAmount[] memory _resourceCostLevels, ResourcesAmount[] memory _resourcesProducedPerLevel)
+        public {
         requireTownType(_townTypeId);
         requireBuildingType(_buildingTypeId);
 
@@ -183,6 +187,7 @@ contract Town is ERC721 {
         for(uint256 i; i < rblLength; i++){
             uint256 length = rbl[i].length;
             building.requiredResourceCostLevels.push(_resourceCostLevels[i]);
+            building.resourcesProducedPerLevel.push(_resourcesProducedPerLevel[i]);
             uint256 requiredBuildingLevelsId = _requiredBuildingLevelsIdCounter.current();
             _requiredBuildingLevelsIdCounter.increment();
             building.requiredBuildingLevels.push(requiredBuildingLevelsId);
